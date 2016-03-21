@@ -1,3 +1,4 @@
+
 // Returns a random integer between min (included) and max (excluded)
 // Using Math.round() will give you a non-uniform distribution!
 // From MDN
@@ -32,7 +33,7 @@ Enemy.prototype.update = function(dt) {
     // You should multiply any movement by the dt parameter
     // which will ensure the game runs at the same speed for
     // all computers.
-    var speedIndex = getRandomInt(1, 5) * 100;
+    var speedIndex = getRandomInt(1, 10) * 100;
     this.x += (speedIndex * dt);
     if (this.x > ctx.canvas.width) {
         this.x = 0;
@@ -69,16 +70,21 @@ Player.prototype.update = function() {
         this.img = Resources.get(this.sprite);
         this.width = this.img.width;
         this.height = this.img.height;
-        this.returnToStart()
+        this.returnToStart();
     }
 
     this.checkCollisions();
-}
+};
+
 
 Player.prototype.render = function() {
     // var img = Resources.get(this.sprite);
+    if (this.youwon) {
+	ctx.fillStyle = "red";
+	ctx.fillRect(100, 100, 100, 100);
+    }
     ctx.drawImage(this.img, this.x, this.y);
-}
+};
 
 Player.prototype.isOnBoard = function() {
     var playerImg = Resources.get(this.sprite);
@@ -95,17 +101,42 @@ Player.prototype.isOnBoard = function() {
         return false;
     }
     return true;
-}
+};
+
+Player.prototype.atTheWater = function() {
+    console.log("this.y = " + this.y);
+    if (this.y < 80) {
+	return true;
+    }
+    return false;
+};
 
 Player.prototype.returnToStart = function() {
     var playerImg = Resources.get(this.sprite);
     this.x = ctx.canvas.width / 2 - (playerImg.width / 2);
     this.y = 5 * 83;
-}
+};
+
+
+Player.prototype.resetForAnotherRound = function(target) {
+};
+
+Player.prototype.youWonTheRound = function() {
+    var title = document.getElementById("title");
+    title.innerHTML = "You Won!";
+    title.setAttribute("style", "color: red;");
+    window.setTimeout(resetTitle, 2000);
+};
 
 
 Player.prototype.handleInput = function(keycode) {
     console.log("handleInput: x=" + this.x, ", y=" + this.y);
+
+    if (this.atTheWater()) {
+    	this.youWonTheRound();
+    	return;
+    }
+
     if (keycode == 'up') {
         this.y -= this.moveY;
     } else if (keycode == 'down') {
@@ -116,17 +147,14 @@ Player.prototype.handleInput = function(keycode) {
         this.x += this.moveX;
     }
 
-    // TODO: Right now, if the player tries to move off the board, I just
-    // move them back to the original position.  A better approach
-    // may be just to not update the position, so additional presses
-    // of the arrow key doesn't do anything.
+   if (!this.isOnBoard()) {
+       this.returnToStart();
+   } else if (this.atTheWater()) {
+    	this.youWonTheRound();
+   }
 
-    if (!this.isOnBoard()) {
-        console.log("WE'RE OFF THE BOARD");
-        this.returnToStart()
-    }
 
-}
+};
 
 
 Player.prototype.checkCollisions = function() {
@@ -153,10 +181,19 @@ Player.prototype.checkCollisions = function() {
 var allEnemies = Array();
 allEnemies.push(new Enemy());
 allEnemies.push(new Enemy());
+allEnemies.push(new Enemy());
 
 // Place the player object in a variable called player
 var player = new Player();
 //player.enemies = allEnemies;
+
+
+function resetTitle() {
+    var title = document.getElementById("title");
+    title.innerHTML = "Play on...";
+    title.setAttribute("style", "color: black;");
+    player.returnToStart();
+}
 
 
 // This listens for key presses and sends the keys to your
