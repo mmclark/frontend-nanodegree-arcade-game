@@ -8,3 +8,6 @@ Playing the game is easy.  To run, simply load index.html in your web
 browser.  The use your arrow keys to move up, down, right and left.
 Avoid the ladybug "enemies".  If you do get hit, your player is moved
 back to the beginning and you can try again.
+
+You can select your player by choosing a character from the drop-down
+menu.
