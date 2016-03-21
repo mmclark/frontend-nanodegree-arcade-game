@@ -1,6 +1,10 @@
-frontend-nanodegree-arcade-game
-===============================
+# Avoid the Bugs!
 
-Students should use this [rubric](https://www.udacity.com/course/viewer/#!/c-nd001/l-2696458597/m-2687128535) for self-checking their submission.
+This is a simple but fun arcade game where you as the player avoid the
+ravenous lady bugs crusing down the road.  If you can reach the water
+without being hit - you win!
 
-For detailed instructions on how to get started, check out this [guide](https://docs.google.com/document/d/1v01aScPjSWCCWQLIpFqvg3-vXLH2e8_SZQKC8jNO0Dc/pub?embedded=true).
+Playing the game is easy.  To run, simply load index.html in your web
+browser.  The use your arrow keys to move up, down, right and left.
+Avoid the ladybug "enemies".  If you do get hit, your player is moved
+back to the beginning and you can try again.
