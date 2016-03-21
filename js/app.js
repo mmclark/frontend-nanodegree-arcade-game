@@ -1,34 +1,50 @@
+/**
+ *
+ *
+ */
 
-// Returns a random integer between min (included) and max (excluded)
-// Using Math.round() will give you a non-uniform distribution!
-// From MDN
+
+var TILE_WIDTH = 101;
+var TILE_HEIGHT = 83;
+
+
+/**
+ * Returns a random integer between min (included) and max (excluded)
+ * Using Math.round() will give you a non-uniform distribution! From
+ * MDN
+ *
+ * @param {number} min  The min value of the random range. The return value will be greater or equal to this.
+ * @param {number} max  The max value of the random range.  The return value will be less than this.
+ */
 function getRandomInt(min, max) {
   return Math.floor(Math.random() * (max - min)) + min;
 }
 
 
-// Determine if two objects intersect on the canvas.
-// Each object is expected to have the following
-// properties: x, y, width, height
-function objectsIntersect(img1, img2) {
 
-}
-
-// Enemies our player must avoid
+/**
+ * Enemies our player must avoid
+ *
+ * @constructor
+ */
 var Enemy = function() {
     // Variables applied to each of our instances go here,
     // we've provided one for you to get started
     this.x = 0;
     var index = getRandomInt(1, 5);
-    this.y = index * 80;
+    this.y = index * TILE_HEIGHT-3; // Keep the enemy firmly in it's tile
 
     // The image/sprite for our enemies, this uses
     // a helper we've provided to easily load images
     this.sprite = 'images/enemy-bug.png';
 };
 
-// Update the enemy's position, required method for game
-// Parameter: dt, a time delta between ticks
+
+/**
+ * Update the enemy's position, required method for game
+ *
+ * @param {number} dt  A time delta between ticks
+ */
 Enemy.prototype.update = function(dt) {
     // You should multiply any movement by the dt parameter
     // which will ensure the game runs at the same speed for
@@ -41,14 +57,18 @@ Enemy.prototype.update = function(dt) {
 
 };
 
-// Draw the enemy on the screen, required method for game
+
+/**
+ * Draw the enemy on the screen
+ */
 Enemy.prototype.render = function() {
     ctx.drawImage(Resources.get(this.sprite), this.x, this.y);
 };
 
-// Now write your own player class
-// This class requires an update(), render() and
-// a handleInput() method.
+
+/**
+ * Player class.  Represents the player on the screen.
+ */
 var Player = function() {
     this.name = "Joe";
     this.sprite = 'images/char-boy.png';
@@ -57,15 +77,18 @@ var Player = function() {
     this.width = undefined;
     this.height = undefined;
     this.img = undefined;
-    this.moveX = 101;
-    this.moveY = 83;
+    this.moveX = TILE_WIDTH;
+    this.moveY = TILE_HEIGHT;
 
 
-}
+};
 
+
+/**
+ * Update the location of the player on the game board.
+ */
 Player.prototype.update = function() {
     // Place the play initially at the bottom middle of the screen
-    //var img = Resources.get(this.sprite);
     if (this.img == undefined) {
         this.img = Resources.get(this.sprite);
         this.width = this.img.width;
@@ -77,18 +100,26 @@ Player.prototype.update = function() {
 };
 
 
+/**
+ * Draw the player on the game board
+ */
 Player.prototype.render = function() {
-    // var img = Resources.get(this.sprite);
     if (this.youwon) {
 	ctx.fillStyle = "red";
-	ctx.fillRect(100, 100, 100, 100);
+	ctx.fillRect(100, 100, 100, 100); // TODO
     }
     ctx.drawImage(this.img, this.x, this.y);
 };
 
+
+/**
+ * Determine if the player is still on the board.
+ *
+ * @return {boolean} true if the player is on the board, false if not
+ */
 Player.prototype.isOnBoard = function() {
     var playerImg = Resources.get(this.sprite);
-    console.log("isOnBoard: x=" + this.x, ", y=" + this.y);
+    // console.log("isOnBoard: x=" + this.x, ", y=" + this.y);
 
     // Is the player off the top of the game board?
     if (this.y < 0) {
@@ -103,40 +134,57 @@ Player.prototype.isOnBoard = function() {
     return true;
 };
 
+
+/**
+ * Determine if the player has reached the water or not.
+ *
+ * @return {boolean} true if the player has reached the water, false if not
+ */
 Player.prototype.atTheWater = function() {
-    console.log("this.y = " + this.y);
-    if (this.y < 80) {
+    if (this.y < TILE_HEIGHT) {
 	return true;
     }
     return false;
 };
 
+
+/**
+ * Return the player to the start of the game.
+ */
 Player.prototype.returnToStart = function() {
     var playerImg = Resources.get(this.sprite);
     this.x = ctx.canvas.width / 2 - (playerImg.width / 2);
-    this.y = 5 * 83;
+    this.y = 5 * TILE_HEIGHT;
 };
 
 
-Player.prototype.resetForAnotherRound = function(target) {
-};
-
+/**
+ * Let the player know they've won the round by updating the
+ * title at the top of the game board.
+ */
 Player.prototype.youWonTheRound = function() {
     var title = document.getElementById("title");
     title.innerHTML = "You Won!";
     title.setAttribute("style", "color: red;");
-    window.setTimeout(resetTitle, 2000);
+
+    // Set a timer to revert the title after a small period of time.
+    window.setTimeout(resetGame, 2000);
 };
 
 
+/**
+ * Handle player movement
+ */
 Player.prototype.handleInput = function(keycode) {
-    console.log("handleInput: x=" + this.x, ", y=" + this.y);
-
+    // If the player has already reached the water
+    // let them know.
     if (this.atTheWater()) {
     	this.youWonTheRound();
     	return;
     }
 
+    // Handle the various movement keys by updating the
+    // player's location
     if (keycode == 'up') {
         this.y -= this.moveY;
     } else if (keycode == 'down') {
@@ -147,51 +195,68 @@ Player.prototype.handleInput = function(keycode) {
         this.x += this.moveX;
     }
 
-   if (!this.isOnBoard()) {
-       this.returnToStart();
-   } else if (this.atTheWater()) {
+    // Check if the player has moved off the screen or into the
+    // the water (winner!) before the redraw begins.
+    if (!this.isOnBoard()) {
+	this.returnToStart();
+    } else if (this.atTheWater()) {
     	this.youWonTheRound();
-   }
-
-
+    }
 };
 
 
+/**
+ * Check to see if any of the enemies have collided with the player.
+ * If there's a collision, return the player to the start.
+ */
 Player.prototype.checkCollisions = function() {
     for (var i=0; i < allEnemies.length; i++) {
-        // If the x,y of the player is both (1) less than the right edge of the enemy (x+width)
-        //
         var enemy = allEnemies[i];
         var enemyImg = Resources.get(enemy.sprite);
         var playerImg = Resources.get(this.sprite);
-        if ((this.x >= enemy.x) && (this.x <= (enemy.x + 101))) {
-            if ((this.y >= enemy.y) && (this.y <= (enemy.y + 83))) {
-                // Collision!  Send the player back to the beginning
+
+	// If the space occupied by the player intersects with the
+	// space occupied by any of the enemies, then we have a collision!
+	// If so, send the player back to the beginning.
+        if ((this.x >= enemy.x) && (this.x <= (enemy.x + TILE_WIDTH))) {
+            if ((this.y >= enemy.y) && (this.y <= (enemy.y + TILE_HEIGHT))) {
                 this.returnToStart();
-                // this.x = ctx.canvas.width / 2 - (playerImg.width / 2);
-                // this.y = 5 * 83;
             }
         }
     }
+};
+
+
+/**
+ * Recreate the enemies array for the game.
+ *
+ * @return {array} A array of enemy objects
+ */
+function createEnemies() {
+    var enemiesArray = Array();
+    enemiesArray.push(new Enemy());
+    enemiesArray.push(new Enemy());
+    enemiesArray.push(new Enemy());
+    return enemiesArray;
 }
 
 
-// Now instantiate your objects.
 // Place all enemy objects in an array called allEnemies
-var allEnemies = Array();
-allEnemies.push(new Enemy());
-allEnemies.push(new Enemy());
-allEnemies.push(new Enemy());
+var allEnemies = createEnemies();
 
 // Place the player object in a variable called player
 var player = new Player();
-//player.enemies = allEnemies;
 
 
-function resetTitle() {
+/**
+ * Reset the title and the game board, creating a new
+ * set of enemies and moving the player back to the start.
+ */
+function resetGame() {
     var title = document.getElementById("title");
     title.innerHTML = "Play on...";
     title.setAttribute("style", "color: black;");
+    allEnemies = createEnemies(); // reset the enemies array
     player.returnToStart();
 }
 
