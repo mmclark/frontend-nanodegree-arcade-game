@@ -31,7 +31,7 @@ var Enemy = function() {
     // Variables applied to each of our instances go here,
     // we've provided one for you to get started
     this.x = 0;
-    var index = getRandomInt(1, 5);
+    var index = getRandomInt(1, 4);
     this.y = index * TILE_HEIGHT-3; // Keep the enemy firmly in it's tile
 
     // The image/sprite for our enemies, this uses
