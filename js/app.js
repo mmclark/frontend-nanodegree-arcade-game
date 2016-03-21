@@ -1,9 +1,9 @@
 /**
- *
- *
+ * Simple frogger-like arcade game
  */
 
 
+// Constants for tile width and height
 var TILE_WIDTH = 101;
 var TILE_HEIGHT = 83;
 
@@ -108,6 +108,7 @@ Player.prototype.render = function() {
 	ctx.fillStyle = "red";
 	ctx.fillRect(100, 100, 100, 100); // TODO
     }
+    this.img = Resources.get(this.sprite);
     ctx.drawImage(this.img, this.x, this.y);
 };
 
@@ -119,7 +120,6 @@ Player.prototype.render = function() {
  */
 Player.prototype.isOnBoard = function() {
     var playerImg = Resources.get(this.sprite);
-    // console.log("isOnBoard: x=" + this.x, ", y=" + this.y);
 
     // Is the player off the top of the game board?
     if (this.y < 0) {
@@ -273,3 +273,18 @@ document.addEventListener('keyup', function(e) {
 
     player.handleInput(allowedKeys[e.keyCode]);
 });
+
+
+var playerSelect = document.getElementById("id-player-select");
+playerSelect.addEventListener("change", function(evt) {
+    console.log("you changed the player evt:" + evt.target.value);
+    player.sprite = "images/" + evt.target.value + ".png";
+
+    // Remove the focus from the select so that the arrow keys
+    // don't change the selection
+    evt.target.blur();
+
+    player.render();
+
+});
+playerSelect.selectedIndex = 0;
